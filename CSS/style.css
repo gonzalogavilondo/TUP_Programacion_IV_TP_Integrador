@@ -1,0 +1,196 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+	background-color: #f0b572;
+	color: #2d2118;
+}
+
+/* Centra verticalmente el contenido del encabezado mediante Flexbox y mantiene el título agrupado. */
+header {
+	background-color: rgba(77, 49, 13, 0.623);
+	border-bottom: 3px solid #a56f2a;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	padding: 20px;
+	text-align: center;
+	color: #fffaf1;
+}
+
+/* Organiza el contenido en dos columnas: agregar un libro y filtros a la izquierda y catálogo ocupando las dos filas a la derecha. */
+main {
+	display: grid;
+	grid-template-columns: minmax(240px, 1fr) minmax(0, 2fr); /* Dos columnas: la primera es flexible pero no menor a 240px, la segunda ocupa el resto del espacio. */
+	grid-template-rows: auto auto; /* Dos filas: la primera se ajusta al contenido, la segunda ocupa el resto del espacio disponible. */
+	grid-template-areas:
+		"agregar catalogo"
+		"filtros catalogo";
+	gap: 24px;
+	margin: 0 auto; /* Centra el contenido horizontalmente. */
+	max-width: 1200px;
+	min-height: 100vh; /* Asegura que el contenido principal siempre llene la altura de la ventana. */
+	padding: 32px;
+}
+
+/* Ubica el formulario en la primera área. */
+#agregar-section { 
+	grid-area: agregar;
+}
+
+/* Mantiene los filtros debajo del formulario. */
+#filtros-section {
+	grid-area: filtros;
+}
+
+/* El catálogo ocupa las dos filas del área derecha. */
+#catalogo-section {
+	grid-area: catalogo;
+}
+
+section {
+	background-color: #f8e5ca;
+	border: 1px solid #8b6238;
+	border-radius: 5px;
+	padding: 20px;
+}
+
+/* Separa el título del contenido usando un borde inferior y espacio interno. */
+section h2 {
+	border-bottom: 2px solid #a56f2a;
+	margin-bottom: 16px;
+	padding-bottom: 8px;
+}
+
+/* Apila los campos del formulario y deja una separación entre ellos con gap. */
+#form-libro {
+	display: grid;
+	gap: 10px;
+}
+
+/* Alinea cada etiqueta usando una primera columna fija y una segunda flexible. */
+#form-libro > div,
+#filtros-section > div {
+	align-items: center;
+	display: grid;
+	gap: 8px;
+	grid-template-columns: 120px minmax(0, 1fr); /* Dos columnas: la primera es fija de 120px, la segunda ocupa el resto del espacio disponible. */
+	margin-bottom: 2px;
+}
+
+/* Cambiar de fuente en las etiquetas */
+label {
+	font-weight: bold;
+}
+
+/* Comparte dimensiones, tipografía y bordes */
+input,
+select,
+button {
+	border: 1px solid #8b6238;
+	border-radius: 4px;
+	min-height: 34px; /* Asegura que tengan una altura mínima. */
+	padding: 6px 9px;
+}
+
+/* Permite que los campos ocupen toda la columna. */
+input,
+select {
+	background-color: #fffaf1;
+	width: 100%;
+}
+
+/* Otro color para los botones en acciones visualmente identificables. */
+button {
+	background-color: #a56f2a;
+	color: #fffaf1;
+	cursor: pointer;
+	font-weight: bold;
+}
+
+/* Botón con un color más oscuro al pasar el mouse. */
+button:hover {
+	background-color: #4d310d;
+}
+
+/* Saca el botón y lo alinea con el comienzo. */
+#form-libro > div:last-child {
+	display: block;
+	margin-left: 128px;
+}
+
+/* Crea tarjetas de ancho adaptable: entran tantas como permite el espacio, con un mínimo de 220px. */
+#catalogo-libros {
+	display: grid;
+	gap: 15px;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.libro {
+	background-color: #fffaf1;
+	border: 1px solid #8b6238;
+	border-radius: 5px;
+	padding: 16px;
+}
+
+/* Destaca con un borde más intenso los libros marcados como favoritos. */
+.libro-favorito {
+	border: 2px solid #d19000;
+}
+
+/* Reduce la intensidad en el color de los libros que están prestados. */
+.libro-prestado {
+	background-color: #ead8c0;
+}
+
+.libro h3 {
+	color: #4d310d;
+	margin-bottom: 10px;
+}
+
+.libro p {
+	margin-bottom: 6px;
+}
+
+/* Hace visible la disponibilidad actual. */
+.estado-libro {
+	font-weight: bold;
+	margin-top: 10px;
+}
+
+/* Ordena y separa los botones de favorito y préstamo. */
+.acciones-libro {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+/* Permite que ambos botones compartan el ancho disponible. */
+.acciones-libro button {
+	flex: 1 1 140px;
+}
+
+/* Extiende el mensaje sin resultados a todo el ancho del catálogo. */
+.catalogo-vacio {
+	grid-column: 1 / -1;
+	padding: 20px;
+	text-align: center;
+}
+
+/* En pantallas chicas transforma la distribución de dos columnas en una sola columna. */
+@media (max-width: 700px) {
+	main {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			"agregar"
+			"filtros"
+			"catalogo";
+		min-height: auto;
+		padding: 20px;
+	}
+}
