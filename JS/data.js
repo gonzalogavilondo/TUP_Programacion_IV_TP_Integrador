@@ -1,5 +1,7 @@
 // Contiene los libros iniciales que se muestran cuando se abre la aplicación.
-export let libros = [
+const CLAVE_STORAGE = "bibliotech-libros";
+
+const librosIniciales = [
     {
         id: 1,
         titulo: "Cien años de soledad",
@@ -47,10 +49,34 @@ export let libros = [
     }
 ];
 
-// Guarda el identificador que se le asignará al próximo libro agregado.
-export let proximoID = libros.length + 1;
+// Recupera los datos guardados o usa el catálogo inicial si es la primera visita.
+function cargarLibros() {
+    const librosGuardados = localStorage.getItem(CLAVE_STORAGE);
 
-// Crea un libro, lo incorpora al arreglo y prepara el siguiente identificador.
+    if (!librosGuardados) {
+        return [...librosIniciales];
+    }
+
+    try {
+        const datos = JSON.parse(librosGuardados);
+        return Array.isArray(datos) ? datos : [...librosIniciales];
+    } catch (error) {
+        console.error("No se pudo recuperar el catálogo guardado.", error);
+        return [...librosIniciales];
+    }
+}
+
+// Guarda el catálogo completo
+function guardarLibros() {
+    localStorage.setItem(CLAVE_STORAGE, JSON.stringify(libros));
+}
+
+export const libros = cargarLibros();
+
+// Calcula el siguiente ID a partir del mayor ID existente para no repetirlo.
+let proximoID = Math.max(0, ...libros.map((libro) => libro.id)) + 1;
+
+// Crea un libro, lo incorpora al array y prepara el siguiente id.
 export function agregarLibro(datosLibro) {
     const nuevoLibro = {
         id: proximoID,
@@ -64,6 +90,7 @@ export function agregarLibro(datosLibro) {
 
     libros.push(nuevoLibro);
     proximoID++;
+    guardarLibros();
 }
 
 // Invierte uno de los estados permitidos del libro que coincide con el ID recibido.
@@ -78,5 +105,6 @@ export function alternarEstado(id, estado) {
 
     if (libro) {
         libro[estado] = !libro[estado];
+        guardarLibros();
     }
 }
