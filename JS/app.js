@@ -1,50 +1,53 @@
-import {
-    libros,
-    agregarLibro,
-    alternarEstado
-} from "./data.js";
+import { Biblioteca } from "./biblioteca.js";
 import { renderizarGeneros, renderizarLibros } from "./render.js";
 
-// Obtiene los controles que se utilizarán para agregar y filtrar libros.
-const formulario = document.querySelector("#form-libro");
-const buscador = document.querySelector("#buscar");
+// Crea la biblioteca y carga el catálogo guardado antes de mostrar la página.
+const biblioteca = new Biblioteca("bibliotech-libros");
+biblioteca.cargarCatalogo();
+
+// Obtenemos los elementos del DOM que necesitamos para interactuar con la página.
+const formulario   = document.querySelector("#form-libro");
+const buscador     = document.querySelector("#buscar");
 const filtroGenero = document.querySelector("#filtro-genero");
-const catalogo = document.querySelector("#catalogo-libros");
+const catalogo     = document.querySelector("#catalogo-libros");
 
 // Combina la búsqueda por título y el filtro por género, y actualiza el catálogo.
 function aplicarFiltros() {
-    const textoBuscado = buscador.value.toLowerCase().trim();
-    const generoSeleccionado = filtroGenero.value;
-
-    const librosFiltrados = libros.filter((libro) => {
-        const coincideTitulo = libro.titulo.toLowerCase().includes(textoBuscado);
-        const coincideGenero = generoSeleccionado === "" || libro.genero === generoSeleccionado;
-
-        return coincideTitulo && coincideGenero;
-    });
+    const librosFiltrados = biblioteca.filtrarLibros(
+        buscador.value,
+        filtroGenero.value
+    );
 
     renderizarLibros(librosFiltrados);
 }
 
-// Evita la recarga, toma los campos del formulario y agrega el nuevo libro.
-formulario.addEventListener("submit", (evento) => {
+// Se ejecuta cuando el usuario envía el formulario.
+function agregarLibroDesdeFormulario(evento) {
+    // Evita que el navegador recargue la página.
     evento.preventDefault();
 
-    const datosFormulario = new FormData(formulario);
+    // Obtiene cada campo por separado para que sea fácil ver de dónde sale cada dato.
+    const campoTitulo = document.querySelector("#titulo");
+    const campoAutor  = document.querySelector("#autor");
+    const campoGenero = document.querySelector("#genero");
+    const campoAnio   = document.querySelector("#anio");
+
     const datosLibro = {
-        titulo: datosFormulario.get("titulo").trim(),
-        autor: datosFormulario.get("autor").trim(),
-        genero: datosFormulario.get("genero").trim(),
-        anio: Number(datosFormulario.get("anio"))
+        titulo: campoTitulo.value.trim(),
+        autor: campoAutor.value.trim(),
+        genero: campoGenero.value.trim(),
+        anio: Number(campoAnio.value)
     };
 
-    agregarLibro(datosLibro);
+    biblioteca.agregarLibro(datosLibro);
     formulario.reset();
 
-    // Actualiza los géneros por si el libro agregado incorpora uno nuevo.
-    renderizarGeneros(libros);
+    // Actualizar los géneros por si el libro agregado incorpora uno nuevo.
+    renderizarGeneros(biblioteca.libros);
     aplicarFiltros();
-});
+}
+
+formulario.addEventListener("submit", agregarLibroDesdeFormulario);
 
 // Filtra inmediatamente cada vez que cambia el texto de búsqueda.
 buscador.addEventListener("input", aplicarFiltros);
@@ -52,21 +55,26 @@ buscador.addEventListener("input", aplicarFiltros);
 // Filtra cada vez que el usuario selecciona un género diferente.
 filtroGenero.addEventListener("change", aplicarFiltros);
 
-// Usa delegación de eventos para controlar los botones creados dinámicamente.
-catalogo.addEventListener("click", (evento) => {
-    const boton = evento.target.closest("button[data-accion]");
+// Se ejecuta cuando el usuario hace clic dentro del catálogo.
+function procesarClickDelCatalogo(evento) {
+    const elementoPresionado = evento.target;
 
-    if (!boton) {
+    // Si el elemento presionado no es un botón, no hay nada que hacer.
+    if (elementoPresionado.tagName !== "BUTTON") {
         return;
     }
 
-    const idLibro = Number(boton.dataset.id);
+    const idLibro = Number(elementoPresionado.getAttribute("data-id"));
+    const accion = elementoPresionado.getAttribute("data-accion");
 
-    alternarEstado(idLibro, boton.dataset.accion);
+    biblioteca.alternarEstado(idLibro, accion);
 
     aplicarFiltros();
-});
+}
+
+// Un único evento controla todos los botones que se crean dentro del catálogo.
+catalogo.addEventListener("click", procesarClickDelCatalogo);
 
 // Realiza la primera carga de géneros y libros al abrir la página.
-renderizarGeneros(libros);
-renderizarLibros(libros);
+renderizarGeneros(biblioteca.libros);
+renderizarLibros(biblioteca.libros);
